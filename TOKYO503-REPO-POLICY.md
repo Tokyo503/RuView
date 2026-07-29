@@ -17,6 +17,32 @@ make_api_write_mode: blocked
 
 Because this repository contains a separate project, Tokyo503 automation must not modify runtime code, architecture, permissions, or public-facing behavior automatically.
 
+## v7 Claude Playbooks Policy
+
+v7 Claude playbooks may be used only for read-only review, documentation suggestions, and proposal/report generation.
+
+Allowed v7 use:
+
+```text
+read-only Claude stack review
+agent pattern readiness report
+safe documentation proposal
+non-destructive repository notes
+```
+
+Blocked v7 use:
+
+```yaml
+auto_code_change: false
+auto_install_tools: false
+auto_connect_mcp: false
+auto_create_agents: false
+auto_publish: false
+auto_delete: false
+make_api_write_mode: blocked
+orchestration_live_mode: blocked
+```
+
 ## Allowed from Tokyo503 automation
 
 ```text
@@ -36,4 +62,7 @@ GitHub permission changes
 delete or rename files
 auto publishing
 Make API write mode
+v7 tool installation
+v7 MCP connection
+v7 live orchestration
 ```
