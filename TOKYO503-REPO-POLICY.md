@@ -103,6 +103,41 @@ blocked_v8_actions:
   - raw_payload_logging
 ```
 
+## v9.0 Universal Skills Application
+
+RuView receives the universal skills layer from the main vault as read-only policy and documentation review only.
+
+```yaml
+release: v9.0-skills-universal-application
+main_vault_source: Tokyo503/Tokyo503
+applied_skill_packs:
+  - github-skills-v8-7
+  - make-skills-v8-8
+  - obsidian-skills-v8-9
+allowed_v9_outputs:
+  - read_only_repository_review
+  - github_policy_audit_report
+  - make_spec_reference_report
+  - obsidian_documentation_index_note
+  - documentation_proposal
+  - non_destructive_report
+blocked_v9_actions:
+  - runtime_code_change
+  - architecture_change
+  - secret_change
+  - github_permission_change
+  - delete_or_rename_files
+  - auto_publish
+  - live_api_call
+  - write_or_rotate_secrets
+  - raw_payload_logging
+  - branch_protection_changes
+  - make_api_write_mode
+  - orchestration_live_mode
+  - A5_agent_execution
+  - A6_autonomous_execution
+```
+
 ## Allowed from Tokyo503 automation
 
 ```text
@@ -129,4 +164,5 @@ ChatGPT Claude bridge live call
 OpenAI or Anthropic key storage
 v8 agent live execution
 v8.6 runtime mutation
+v9 live skills execution
 ```
