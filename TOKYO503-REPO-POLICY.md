@@ -11,6 +11,7 @@ no_authorization_headers_in_logs: true
 auto_delete: false
 auto_publish_without_review: false
 make_api_write_mode: blocked
+orchestration_live_mode: blocked
 ```
 
 ## RuView-specific rule
@@ -73,6 +74,35 @@ orchestration_live_mode: blocked
 
 Any bridge output that recommends code or architecture changes must become a proposal/report only; it must not modify RuView runtime files automatically.
 
+## v8.6 Make + GitHub Audit Policy
+
+RuView participates in v8.6 as a read-only reviewed repository.
+
+```yaml
+release: v8.6-make-github-audit-repair
+role: separate_project
+main_vault_source: Tokyo503/Tokyo503
+policy_status: updated
+allowed_v8_outputs:
+  - read_only_review
+  - documentation_proposal
+  - non_destructive_report
+  - repository_policy_note
+blocked_v8_actions:
+  - runtime_code_change
+  - architecture_change
+  - secret_change
+  - github_permission_change
+  - delete_or_rename_files
+  - auto_publish
+  - make_api_write_mode
+  - orchestration_live_mode
+  - live_agent_execution
+  - openai_key_storage
+  - anthropic_key_storage
+  - raw_payload_logging
+```
+
 ## Allowed from Tokyo503 automation
 
 ```text
@@ -97,4 +127,6 @@ v7 MCP connection
 v7 live orchestration
 ChatGPT Claude bridge live call
 OpenAI or Anthropic key storage
+v8 agent live execution
+v8.6 runtime mutation
 ```
