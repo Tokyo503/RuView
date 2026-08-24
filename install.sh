@@ -599,8 +599,8 @@ install_verify_deps() {
 
     if $NEED_INSTALL; then
         echo "  Installing numpy and scipy..."
-        if [ -f "${SCRIPT_DIR}/v1/requirements-lock.txt" ]; then
-            $PYTHON_CMD -m pip install -r "${SCRIPT_DIR}/v1/requirements-lock.txt" 2>&1 | tail -3
+        if [ -f "${SCRIPT_DIR}/archive/v1/requirements-lock.txt" ]; then
+            $PYTHON_CMD -m pip install -r "${SCRIPT_DIR}/archive/v1/requirements-lock.txt" 2>&1 | tail -3
         else
             $PYTHON_CMD -m pip install numpy scipy 2>&1 | tail -3
         fi
@@ -944,7 +944,7 @@ post_install() {
             ;;
         python)
             echo "    # Start the API server:"
-            echo "    uvicorn v1.src.api.main:app --host 0.0.0.0 --port 8000"
+            echo "    cd archive/v1 && uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
             echo ""
             echo "    # Open API docs: http://localhost:8000/docs"
             echo ""
@@ -1007,7 +1007,7 @@ post_install() {
             ;;
         full)
             echo "    # Verification:  ./verify"
-            echo "    # Python API:    uvicorn v1.src.api.main:app --host 0.0.0.0 --port 8000"
+            echo "    # Python API:    cd archive/v1 && uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
             echo "    # Rust API:      cd v2 && cargo run --release --package wifi-densepose-api"
             echo "    # Benchmarks:    cd v2 && cargo bench"
             echo "    # Visualization: python3 -m http.server 3000 --directory ui"
