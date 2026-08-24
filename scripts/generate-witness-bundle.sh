@@ -39,18 +39,18 @@ cp "$REPO_ROOT/docs/adr/ADR-028-esp32-capability-audit.md" "$BUNDLE_DIR/"
 # ---------------------------------------------------------------
 echo "[2/7] Copying proof system..."
 mkdir -p "$BUNDLE_DIR/proof"
-cp "$REPO_ROOT/v1/data/proof/verify.py" "$BUNDLE_DIR/proof/"
-cp "$REPO_ROOT/v1/data/proof/expected_features.sha256" "$BUNDLE_DIR/proof/"
-cp "$REPO_ROOT/v1/data/proof/generate_reference_signal.py" "$BUNDLE_DIR/proof/"
+cp "$REPO_ROOT/archive/v1/data/proof/verify.py" "$BUNDLE_DIR/proof/"
+cp "$REPO_ROOT/archive/v1/data/proof/expected_features.sha256" "$BUNDLE_DIR/proof/"
+cp "$REPO_ROOT/archive/v1/data/proof/generate_reference_signal.py" "$BUNDLE_DIR/proof/"
 # Reference signal is large (~10 MB) — include metadata only
 python3 -c "
 import json, os
-with open('$REPO_ROOT/v1/data/proof/sample_csi_data.json') as f:
+with open('$REPO_ROOT/archive/v1/data/proof/sample_csi_data.json') as f:
     d = json.load(f)
 meta = {k: v for k, v in d.items() if k != 'frames'}
 meta['frame_count'] = len(d['frames'])
 meta['first_frame_keys'] = list(d['frames'][0].keys())
-meta['file_size_bytes'] = os.path.getsize('$REPO_ROOT/v1/data/proof/sample_csi_data.json')
+meta['file_size_bytes'] = os.path.getsize('$REPO_ROOT/archive/v1/data/proof/sample_csi_data.json')
 with open('$BUNDLE_DIR/proof/reference_signal_metadata.json', 'w') as f:
     json.dump(meta, f, indent=2)
 " 2>/dev/null && echo "  Reference signal metadata extracted." || echo "  (Python not available — metadata skipped)"
@@ -73,7 +73,7 @@ cd "$REPO_ROOT"
 # 4. Run Python proof verification
 # ---------------------------------------------------------------
 echo "[4/7] Running Python proof verification..."
-python3 "$REPO_ROOT/v1/data/proof/verify.py" 2>&1 | tee "$BUNDLE_DIR/proof/verification-output.log" | tail -5 || true
+python3 "$REPO_ROOT/archive/v1/data/proof/verify.py" 2>&1 | tee "$BUNDLE_DIR/proof/verification-output.log" | tail -5 || true
 
 # ---------------------------------------------------------------
 # 5. Firmware manifest
