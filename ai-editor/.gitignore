@@ -1,0 +1,12 @@
+# media & working dirs are never committed (large, and references are third-party content)
+raw/
+references/
+done/
+mine/
+_test/
+node_modules/
+*.mp4
+*.mov
+*.wav
+*.m4a
+*.mp3
