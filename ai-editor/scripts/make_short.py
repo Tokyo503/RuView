@@ -81,7 +81,7 @@ def esc(s):
     return s.replace("{", "(").replace("}", ")").replace("\\", "/")
 
 
-def build_ass(path, sents, title, total):
+def build_ass(path, sents, title, total, box=False):
     hdr = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
@@ -91,12 +91,16 @@ WrapStyle: 0
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Title,{FONT},78,{GOLD},{WHITE},&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,6,2,8,70,70,230,-1
-Style: Cap,{FONT},96,{WHITE},{WHITE},&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,7,3,2,60,60,640,-1
+{{CAP}}
 Style: Sig,{FONT},44,{GOLD},{WHITE},&H00000000,&H00000000,1,0,0,0,100,100,2,0,1,3,0,2,0,0,330,-1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    cap_plain = f"Style: Cap,{FONT},96,{WHITE},{WHITE},&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,7,3,2,60,60,640,-1"
+    # BorderStyle 3 = opaque box; OutlineColour is the box fill (dark, 25 % transparent), Outline = padding
+    cap_box = f"Style: Cap,{FONT},88,{WHITE},{WHITE},&H40101010,&H00000000,1,0,0,0,100,100,0,0,3,14,0,2,60,60,640,-1"
+    hdr = hdr.replace("{CAP}", cap_box if box else cap_plain)
     ev = []
     if title:
         ev.append(f"Dialogue: 1,{ass_time(0)},{ass_time(min(3.0, total))},Title,,0,0,0,,{{\\fad(0,250)}}{esc(title)}")
@@ -115,13 +119,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     open(path, "w", encoding="utf-8").write(hdr + "\n".join(ev) + "\n")
 
 
-def render_shot(img, dur, out, zoom, punch_at, fit):
+def render_shot(img, dur, out, zoom, punch_at, fit, z0=1.0, xoff=0.0, yoff=0.0):
+    """z0 > 1 = punch-in framing of the same image; xoff/yoff shift the crop centre (fraction of width/height)."""
     n = max(1, round(dur * FPS))
-    z = f"1+{zoom}*on/{n}"
+    z = f"{z0}+{zoom}*on/{n}"
     if punch_at is not None:  # +10 % punch over 4 frames at the payoff word
         p = round(punch_at * FPS)
         z = f"{z}+if(gte(on,{p}),min((on-{p})/4,1)*0.10,0)"
-    zp = f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s={W}x{H}:fps={FPS}"
+    zp = f"zoompan=z='{z}':x='iw/2-(iw/zoom/2)+{xoff}*iw/2*(1-1/zoom)':y='ih/2-(ih/zoom/2)+{yoff}*ih/2*(1-1/zoom)':d=1:s={W}x{H}:fps={FPS}"
     grade = "eq=contrast=1.08:saturation=1.08,vignette=PI/6"
     if fit == "blur":  # image centred on a blurred copy of itself (no cropping of the art)
         fc = (f"[0:v]split[a][b];[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
@@ -143,6 +148,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--fit", choices=["blur", "fill"], default="fill")
     ap.add_argument("--model", default="small")
+    ap.add_argument("--max-shot", type=float, default=0,
+                    help="split shots longer than this (s) into punch-in sub-shots of the same image; first cut <=0.9 s (e.g. 2.0)")
+    ap.add_argument("--caption-box", action="store_true", help="captions in a dark box (readable on any background)")
     a = ap.parse_args()
 
     imgs = sorted(f for f in glob.glob(os.path.join(a.images, "*"))
@@ -160,13 +168,26 @@ def main():
 
     tmp = tempfile.mkdtemp(prefix="short_")
     with open(f"{tmp}/list.txt", "w") as lst:
+        k = 0
+        framings = [(1.0, 0.0, 0.0), (1.42, 0.45, -0.3), (1.28, -0.45, 0.25), (1.55, 0.0, -0.4)]
         for i, (s, e) in enumerate(shots):
             last = i == len(shots) - 1
-            render_shot(imgs[i], e - s, f"{tmp}/{i:02d}.mp4", 0.06, (payoff_word - s) if last else None, a.fit)
-            lst.write(f"file '{i:02d}.mp4'\n")
+            cuts = [s]
+            if a.max_shot:
+                if i == 0 and e - s > 1.6:
+                    cuts.append(s + 0.9)  # first cut inside the first second
+                while e - cuts[-1] > a.max_shot:
+                    cuts.append(cuts[-1] + (e - cuts[-1]) / -(-(e - cuts[-1]) // a.max_shot))
+            cuts.append(e)
+            for j, (cs, ce) in enumerate(zip(cuts, cuts[1:])):
+                z0, xo, yo = framings[j % len(framings)]
+                punch = (payoff_word - cs) if (last and cs <= payoff_word < ce) else None
+                render_shot(imgs[i], ce - cs, f"{tmp}/{k:03d}.mp4", 0.06 if j == 0 else 0.04, punch, a.fit, z0, xo, yo)
+                lst.write(f"file '{k:03d}.mp4'\n"); k += 1
+        print(f"{k} cuts, avg {total / k:.2f}s")
     run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", f"{tmp}/list.txt",
          "-c", "copy", f"{tmp}/video.mp4"])
-    build_ass(f"{tmp}/subs.ass", sents, a.title, total)
+    build_ass(f"{tmp}/subs.ass", sents, a.title, total, a.caption_box)
 
     voice = "highpass=f=80,acompressor=threshold=-20dB:ratio=3:attack=5:release=80:makeup=2"
     if a.music:

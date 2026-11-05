@@ -28,3 +28,13 @@ A 403 from the proxy = host blocked → tell the user to add it under the enviro
 - `grep -q` + `set -o pipefail` gives false FAILs; redirect to /dev/null instead.
 - faster-whisper's bundled PyAV may reject files: decode with ffmpeg to 16 kHz PCM and pass a numpy array (done in `make_short.py`).
 - Skip edge-tts: speech.platform.bing.com is unreachable from cloud sessions.
+
+## External toolkits (reviewed Nov 2026, not vendored)
+Cloned for reference to `/home/user/external` (`git clone --depth 1`):
+| Repo | License | Use |
+|---|---|---|
+| `nateherkai/herk-edit-kit` | MIT | 15 skills plus `docs/EDITING-PLAYBOOK.md` (measured reel numbers, adopted in `short-from-assets`) |
+| `haidrrrry/claude-remotion-skill` | MIT | Remotion motion-graphics skill |
+| `calesthio/OpenMontage` | AGPL-3.0 | 49 skills, mostly needing paid API keys. Never copy its code into this repo |
+| `SWivid/Habibi-TTS` (pip `habibi-tts`) | code MIT, SAU model CC-BY-NC-SA | Saudi voice cloning, see `scripts/tts_clone.sh` |
+Running their own scripts (npm install, preflight) needs the user's explicit approval: the auto-mode safety check blocks unreviewed external code. Read their docs and port ideas into `ai-editor/scripts/` instead.
