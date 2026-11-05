@@ -27,9 +27,11 @@ Facts must be correct (canon, game history, real horticulture). Re-check each cl
 It also writes each `raw/<slug>/script.txt` and `title.txt`, but only when it reaches that video, so extract all scripts first if voices are needed sooner.
 Style by type: anime = 2D cel-shaded; game = retro arcade neon (minecraft = voxel); garden = soft photo.
 
-## 3. Voices
-`bash scripts/tts.sh <slug>` per video. If the voice runs over 23 s, rerun with `bash scripts/tts.sh <slug> 0.74`.
-Piper speaks Jordanian/MSA, not Saudi: tell the user, and offer to swap in their own recordings.
+## 3. Voices (pick one)
+- **Saudi, owner's cloned voice (best):** `bash scripts/tts_clone.sh <slug>` uses Habibi-TTS (Specialized **SAU** model, F5-TTS) and clones `tts/habibi/ref_tokyo.wav`, which is the owner's own voice from the Aizen short. About 5 min per 20 s on CPU, so run it in the background. Pronunciation is real Najdi (ق→ج). Install notes are in the script header (venv `/root/hbenv`, torchaudio 2.8.0 to match torch).
+  **License: the SAU model is CC-BY-NC-SA-4.0 (non-commercial).** Tell the user before it's used on monetised or sponsored posts.
+- **Fast fallback:** `bash scripts/tts.sh <slug>` (Piper, Jordanian/MSA, Apache). If it runs over 23 s, use `bash scripts/tts.sh <slug> 0.74`.
+- The owner's own recordings always win: drop them in as `raw/<slug>/voice.wav`.
 
 ## 4. Build as images finish (background loop)
 For each slug: wait until 6 images exist (or the log says `ALL DONE`), then run `trim_borders.py`, then `make_short.py` with `--script/--title/--music` (dark for anime/game, calm for garden), then the contact sheet. See `short-from-assets` for the QA rules. Or run `bash scripts/build_all.sh` once all images exist.
