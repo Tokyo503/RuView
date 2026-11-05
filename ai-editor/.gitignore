@@ -13,3 +13,4 @@ node_modules/
 tts/
 music/
 *.onnx
+__pycache__/

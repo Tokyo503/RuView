@@ -3,7 +3,11 @@
 Short-form video editing pipeline driven by Claude Code: FFmpeg + libass, faster-whisper, yt-dlp, Remotion, HyperFrames.
 House style lives in [`style.md`](style.md) and is derived from measurements of the `@tokyo.966` / `@tokyo_503` channels.
 
+## Skills
+Each workflow is a Claude Code skill in `.claude/skills/`: `video-editor-setup`, `video-style-from-references`, `channel-analytics`, `shorts-remaster`, `short-from-assets`, `ai-shorts-factory`, `beat-synced-reel`.
+
 ## Setup
+`bash scripts/setup.sh` (or manually:)
 ```bash
 pip install yt-dlp faster-whisper
 npm install                     # remotion, hyperframes
@@ -14,6 +18,11 @@ Folders (git-ignored): `raw/` input, `references/` style references, `done/` out
 ## Scripts
 | Script | What it does |
 |---|---|
+| `scripts/setup.sh` | installs + verifies every tool, font, voice and music bed; prints an OK/FAIL table |
+| `scripts/analyze_video.sh` | measures a video: cuts, silences, LUFS, beats, contact sheet |
+| `scripts/channel_stats.py` | channel-wide views by topic/language via yt-dlp |
+| `scripts/tts.sh` | Arabic AI voice for `raw/<slug>/script.txt` (Piper, offline) |
+| `scripts/make_music.sh` | synthesizes royalty-free music beds |
 | `scripts/make_short.py` | images + voice (+ script, music) → finished 1080×1920 short: Whisper word timings, one image per sentence, Ken Burns + payoff punch-zoom, gold title, word-by-word Arabic captions, ducked music, -14 LUFS |
 | `scripts/remaster.sh` | fixes an existing short: 1080×1920, -14 LUFS, AAC 192k, trims trailing silence |
 | `scripts/gen_images.py` | generates the 6 images per video listed in `content/next-5.md` (pollinations free tier, 1 image / 45 s) |
