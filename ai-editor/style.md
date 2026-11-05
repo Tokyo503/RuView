@@ -55,7 +55,9 @@ The anime reels in `references/` remain a visual mood board only.
 ### Export
 - 1080×1920, 30 fps, H.264 High CRF 18, AAC 192 kbps, `+faststart`, into `done/`.
 
-### Topic plan (from the data)
-- TikTok: anime theories (One Piece, Bleach, Dragon Ball, Naruto) plus game opinions.
-- YouTube Shorts: balcony gardening in Riyadh plus Arabic history/legends.
-- Stop English news content.
+### Topic plan (owner decision: anime, gaming, gardening only)
+- **Anime** (TikTok): theories and hidden details (One Piece, Bleach, Dragon Ball, Naruto, JJK, Demon Slayer). Best average on TikTok (321 views).
+- **Gaming** (TikTok): design secrets and behind-the-scenes facts (Minecraft, Pac-Man, Mario, GTA, Zelda). TikTok average 224.
+- **Gardening** (YouTube Shorts): balcony gardening in Riyadh, regrowing from kitchen scraps, seasonal (November = lettuce, greens). Best average on YouTube (339).
+- No other topics: history and English news are dropped.
+- Music: dark ambient bed for anime/gaming, calm warm bed for gardening.
