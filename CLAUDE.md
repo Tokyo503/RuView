@@ -197,6 +197,11 @@ Active feature branch: `ruvsense-full-implementation` (PR #77)
 
 ---
 
+## Language Rule (owner instruction — always enforced)
+
+- **Every message, summary, report or caption sent to the user must be in Arabic (عربي)**, even if the conversation, tools or source material are in English.
+- Code, file names, commands, commit messages and PR descriptions stay in English.
+
 ## Behavioral Rules (Always Enforced)
 
 - Do what has been asked; nothing more, nothing less
