@@ -54,6 +54,9 @@ def apply_script(sents, script_text):
     lines = [l.strip() for l in re.split(r"[.!?؟\n]+", script_text) if l.strip()]
     words = [(li, w) for li, l in enumerate(lines) for w in l.replace("،", " ").split()]
     n, m = len(words), len(spans)
+    if not n:  # empty script file: keep Whisper's own words instead of crashing later
+        print("warning: script is empty, using Whisper's words", file=sys.stderr)
+        return sents
     out = {}
     for i, (li, w) in enumerate(words):
         a = spans[min(int(i * m / n), m - 1)][0]
@@ -116,7 +119,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                                for j, (_, _, w) in enumerate(ch))
                 pop = "{\\fscx108\\fscy108\\t(0,90,\\fscx100\\fscy100)}" if wi == 0 else ""
                 ev.append(f"Dialogue: 2,{ass_time(st)},{ass_time(end)},Cap,,0,0,0,,{pop}{txt}")
-    open(path, "w", encoding="utf-8").write(hdr + "\n".join(ev) + "\n")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(hdr + "\n".join(ev) + "\n")
 
 
 def render_shot(img, dur, out, zoom, punch_at, fit, z0=1.0, xoff=0.0, yoff=0.0):
@@ -157,12 +161,17 @@ def main():
                   if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")))
     if not imgs:
         sys.exit("no images found")
+    if a.music and not os.path.isfile(a.music):
+        sys.exit(f"music file not found: {a.music} (run scripts/make_music.sh)")
     sents = transcribe(a.voice, a.model)
     if a.script:
         txt = open(a.script, encoding="utf-8").read() if os.path.isfile(a.script) else a.script
         sents = apply_script(sents, txt)
     total = round(sents[-1]["end"] + 0.35, 3)  # stop 0.35 s after the last word
     shots = plan_shots(sents, len(imgs), total)
+    if len(shots) < len(imgs):
+        print(f"warning: {len(imgs)} images but only {len(sents)} sentences; "
+              f"images after #{len(shots)} are not used", file=sys.stderr)
     payoff_word = sents[-1]["words"][-1][0]
     print(f"{len(sents)} sentences, {len(shots)} shots, {total:.2f}s")
 
@@ -192,7 +201,7 @@ def main():
     voice = "highpass=f=80,acompressor=threshold=-20dB:ratio=3:attack=5:release=80:makeup=2"
     if a.music:
         afc = (f"[1:a]atrim=0:{total},asetpts=N/SR/TB,{voice},asplit[v1][v2];"
-               f"[2:a]atrim=0:{total + 1},asetpts=N/SR/TB,volume=-16dB,afade=t=out:st={total - 0.6}:d=0.6[m];"
+               f"[2:a]atrim=0:{total + 1},asetpts=N/SR/TB,volume=-16dB,afade=t=out:st={max(total - 0.6, 0)}:d=0.6[m];"
                f"[m][v2]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=300[md];"
                f"[v1][md]amix=inputs=2:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=7[a]")
         ins = ["-i", a.voice, "-stream_loop", "-1", "-i", a.music]
