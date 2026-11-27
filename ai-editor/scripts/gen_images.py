@@ -14,13 +14,20 @@ md = open(os.path.join(ROOT, plan), encoding="utf-8").read()
 blocks = re.split(r"\n## \d+\) ", md)[1:]
 for n, b in enumerate(blocks):
     m = re.search(r"^slug: *([a-z0-9_-]+)", b, re.M)
-    slug = m.group(1) if m else LEGACY[n]
+    slug = m.group(1) if m else (LEGACY[n] if n < len(LEGACY) else f"video{n + 1}")
     kind = (re.search(r"^type: *(\w+)", b, re.M) or [None, "anime"])[1]
     os.makedirs(os.path.join(ROOT, "raw", slug), exist_ok=True)
-    title = re.search(r"\*\*العنوان:\*\* (.+)", b).group(1).strip()
+    tm = re.search(r"\*\*العنوان:\*\* (.+)", b)
+    if not tm or "**السكربت:**" not in b or "**الصور:**" not in b:
+        print(slug, "SKIPPED: section needs **العنوان:**, **السكربت:** and **الصور:**", flush=True)
+        continue
+    title = tm.group(1).strip()
     lines = re.findall(r"^\d\. (.*[\u0600-\u06FF].*)$", b.split("**السكربت:**")[1].split("**الصور:**")[0], re.M)
     open(os.path.join(ROOT, "raw", slug, "title.txt"), "w", encoding="utf-8").write(title)
     open(os.path.join(ROOT, "raw", slug, "script.txt"), "w", encoding="utf-8").write("\n".join(lines) + "\n")
+    # build_all.sh reads this to pick the music bed (garden -> calm_warm, else dark_ambient)
+    open(os.path.join(ROOT, "raw", slug, "type.txt"), "w", encoding="utf-8").write(
+        ("garden" if slug == "mint" else kind) + "\n")
     prompts = re.findall(r"^\d\. ([a-zA-Z].*)$", b.split("**الصور:**")[1].split("**تعليق")[0], re.M)
     out = os.path.join(ROOT, "raw", slug, "imgs"); os.makedirs(out, exist_ok=True)
     style = STYLE.replace("2D anime screencap, cel shading, bold clean lineart, flat colors, dark cinematic lighting, deep navy shadows, ",

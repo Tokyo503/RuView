@@ -25,9 +25,11 @@ Folders (git-ignored): `raw/` input, `references/` style references, `done/` out
 | `scripts/make_music.sh` | synthesizes royalty-free music beds |
 | `scripts/make_short.py` | images + voice (+ script, music) → finished 1080×1920 short: Whisper word timings, one image per sentence, Ken Burns + payoff punch-zoom, gold title, word-by-word Arabic captions, ducked music, -14 LUFS |
 | `scripts/remaster.sh` | fixes an existing short: 1080×1920, -14 LUFS, AAC 192k, trims trailing silence |
-| `scripts/gen_images.py` | generates the 6 images per video listed in `content/next-5.md` (pollinations free tier, 1 image / 45 s) |
+| `scripts/gen_images.py` | generates the 6 images per video listed in `content/next-5.md` (pollinations free tier, 1 image / 45 s); also writes `title.txt`, `script.txt`, `type.txt` |
 | `scripts/trim_borders.py` | trims flat white/black border strips some generators add |
-| `scripts/build_all.sh` | builds every `raw/<slug>/` project (imgs + voice.wav + script.txt + title.txt) into `done/` |
+| `scripts/build_all.sh` | builds every `raw/<slug>/` project (imgs + voice.wav + script.txt + title.txt) into `done/`; gardening (`type.txt` = garden) gets the calm_warm bed, the rest dark_ambient; a failed project doesn't stop the batch; `QA=1` prints each short's transcript match, `ONLY=<slug>` builds one |
+
+Tests: `python3 -m unittest discover -s tests` (from `ai-editor/`, no Whisper or ffmpeg needed).
 | `scripts/edit_reel1.sh` | example beat-synced music reel (cuts on a 130 BPM grid, peak on the drop) |
 
 ```bash
